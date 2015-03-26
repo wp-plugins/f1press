@@ -1,6 +1,6 @@
 === F1Press ===
 Contributors: LimeiraStudio
-Tags: Formula1, F1, Grand Prix, aggregation, feed, BBC News, car, sport, racing, news, widget, sidebar, RSS
+Tags: Formula1, F1, Grand Prix, aggregation, feed, BBC News, car, sport, racing, news, widget, Schumacher, Hamilton, Alonso, Rosberg, Vettel, McLaren, Ferrari, Mercedes, Sauber, Williams, sidebar, RSS
 Requires at least: 3.0.1
 Tested up to: 4.1.1
 Stable tag: 1.5
