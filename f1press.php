@@ -32,7 +32,8 @@ class F1_Press extends WP_Widget {
 			'trim_description'	=> 30,
 			'show_images'		=> 'on',
 			'show_description'	=> 'on',
-			'show_date'			=> ''
+			'show_date'			=> '',
+			'show_countdown'	=> ''
 		);
 	}
 		
@@ -45,6 +46,7 @@ class F1_Press extends WP_Widget {
 		$show_images = !empty($instance['show_images']) ? $instance['show_images'] : '';
 		$show_date = !empty($instance['show_date']) ? $instance['show_date'] : '';
 		$show_description = !empty($instance['show_description']) ? $instance['show_description'] : '';
+		$show_countdown = !empty($instance['show_countdown']) ? $instance['show_countdown'] : '';
 		?>
 
 		<p>
@@ -71,19 +73,25 @@ class F1_Press extends WP_Widget {
 			<label for="<?=$this->get_field_id('trim_description'); ?>">
 			<input id="<?=$this->get_field_id('trim_description'); ?>" name="<?=$this->get_field_name('trim_description'); ?>" size="3" maxlength="3" type="text" value="<?=esc_attr($trim); ?>" /> Trim Description</label>		
 		</p>
+		<p>
+		    <input class="checkbox" type="checkbox" <?php checked($show_countdown, 'on'); ?> id="<?=$this->get_field_id('show_countdown'); ?>" name="<?=$this->get_field_name('show_countdown'); ?>" /> 
+		    <label for="<?=$this->get_field_id('show_countdown'); ?>"> Show Countdown</label>
+		</p>
 			<?php 
 	}
 
 	public function widget($args, $instance)	{
+
 		$title = $instance['title'];
 		$perpage = $instance['items_per_page'];
 		$trim = $instance['trim_description'];
 		$show_images = $instance['show_images'];
 		$show_date = $instance['show_date'];
 		$show_description = $instance['show_description'];
+		$show_countdown = $instance['show_countdown'];
 		
 		echo $args['before_widget'];?>
-		
+
 		<style>
 		.f1press-item	{
 			display: inline-block;
@@ -134,6 +142,7 @@ class F1_Press extends WP_Widget {
 			<hr style="border: 1px dotted" />
 		<?php
 		}
+		if($show_countdown)	{$this->countown_widget();}
 		echo $args['after_widget'];
 	}
 
@@ -145,8 +154,16 @@ class F1_Press extends WP_Widget {
 		$instance['show_images'] = (isset($new_instance['show_images'])) ? strip_tags($new_instance['show_images']) : '';
 		$instance['show_date'] = (isset($new_instance['show_date'])) ? strip_tags($new_instance['show_date']) : '';
 		$instance['show_description'] = (isset($new_instance['show_description'])) ? strip_tags($new_instance['show_description']) : '';
+		$instance['show_countdown'] = (isset($new_instance['show_countdown'])) ? strip_tags($new_instance['show_countdown']) : '';
 		
 		return $instance;
+	}
+	
+	private function countown_widget()	{
+		echo '
+			<div id="f1-press-widget-container">
+    			<script src="'.plugin_dir_url( __FILE__ ).'f1press-count.js"></script>
+			</div>';
 	}
 	
 }
