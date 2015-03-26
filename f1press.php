@@ -81,7 +81,6 @@ class F1_Press extends WP_Widget {
 	}
 
 	public function widget($args, $instance)	{
-
 		$title = $instance['title'];
 		$perpage = $instance['items_per_page'];
 		$trim = $instance['trim_description'];
@@ -161,8 +160,8 @@ class F1_Press extends WP_Widget {
 	
 	private function countown_widget()	{
 		echo '
-			<div id="f1-press-widget-container">
-    			<script src="'.plugin_dir_url( __FILE__ ).'f1press-count.js"></script>
+			<div id="f1-widget-container">
+    			<script src="http://amitd.co/widgets/f1/f1-countdown.min.js"></script>
 			</div>';
 	}
 	
