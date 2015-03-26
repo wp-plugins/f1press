@@ -141,7 +141,7 @@ class F1_Press extends WP_Widget {
 			<hr style="border: 1px dotted" />
 		<?php
 		}
-		if($show_countdown)	{$this->countown_widget();}
+		if($show_countdown)	{$this->countdown_widget();}
 		echo $args['after_widget'];
 	}
 
@@ -158,7 +158,7 @@ class F1_Press extends WP_Widget {
 		return $instance;
 	}
 	
-	private function countown_widget()	{
+	private function countdown_widget()	{
 		echo '
 			<div id="f1-widget-container">
     			<script src="http://amitd.co/widgets/f1/f1-countdown.min.js"></script>
