@@ -2,101 +2,153 @@
 
 /*
 Plugin Name: F1 Press
-Description: Displays the latest Formula 1 official site news on your blog.
-Version: 1.1
-Author: pagepro.com.ua
+Description: Displays the latest Formula1 news on your blog.
+Version: 1.5
+Author: Limeira Studio
+Author URI: http://www.limeirastudio.com/
 License: GPL2
+Copyright: Limeira Studio
 */
-define(f1_DESC_CHARS, '100');
-define(f1_DESC, '');
-define(f1_IMG, 'checked="checked"');
-define(f1_DIR, basename(dirname(__FILE__)));
-define(f1_RSS_items, '10');
-define(f1_RSS, 'http://www.formula1.com/rss/news/latest.rss');
-define(f1_TITLE, 'F1 Press');
-include_once(ABSPATH . WPINC . '/rss.php');
 
-function cut_f1text($str,$length)  {
-  while(substr($str,$length,1) !== " ")  {
-    substr($str,$length,1);
-    $length = $length - 1;
-  }
-  $str = substr($str,0,$length);
-  $str .= ' ...';
-  return $str;
+function register_f1_press_widget()	{
+	register_widget('F1_Press');
 }
+add_action('widgets_init', 'register_f1_press_widget');
 
-function widget_f1pwidget_init() {
-	if(!function_exists('register_sidebar_widget'))
-		return;
-		
-	function widget_f1pwidget($args) {
-		extract($args);			
-		$wpurl = get_bloginfo('wpurl');
-  		$options = get_option('widget_f1pwidget');
-
-  		$rss = fetch_rss(f1_RSS);
-  		$img_url = $rss->image['url'];
-  		$output = '';
-  		if($img_url && $options['f1pwidget_image'])  {
-    		$output = '<a href="'.$rss->image['link'].'" target="_blank"><img src="'.$img_url.'" border="0" style="border:1px solid #000"/><br/><strong>'.$rss->image['title'].'</strong></a><br/><br/>';
-  		}
-  		$items = count($rss->items);
-
-		if($items != 0)  {
-    		$output .= '<ul>';		
-    		for($i=0; $i<$options['f1pwidget_items'] && $i<$items; $i++)  {
-      			$output .= '<li>';
-      			$output .= '<a href="'.$rss->items[$i]['link'].'" target="_blank"><strong>'.$rss->items[$i]['title'].'</strong></a></span>';
-      			if($options['f1pwidget_desc'])  {  
-        			$output.= '<br/>'.cut_f1text($rss->items[$i]['description'], $options['f1pwidget_chars']).'&nbsp;&nbsp;<a href="'.$rss->items[$i]['link'].'" target="_blank"><strong>read more &raquo;</strong></a>';
-      			}
-      			$output .= '</li>';
-    		}
-    		$output .= '</ul>';
-  		}
-  		$title = $options['f1pwidget_title'];
-  		echo $before_widget;
-  		echo $before_title . $title . $after_title;
-  		echo $lightbox;
-  		echo $output;
-  		echo $after_widget;
+class F1_Press extends WP_Widget {
+			
+	private $feed = 'http://feeds.bbci.co.uk/sport/0/formula1/rss.xml';
+	
+	function __construct()	{
+		$options = array(
+            'description'   =>  'Displays the latest Formula1 news on your blog.',
+            'name'          =>  'F1 Press'
+        );
+		parent::__construct('f1_press', '', $options);
+		$this->defaults = array(
+			'title'				=> 'F1 Press',
+			'items_per_page'	=> '5',
+			//'view_type'			=> 2, //TODO
+			'trim_description'	=> 30,
+			'show_images'		=> 'on',
+			'show_description'	=> 'on',
+			'show_date'			=> ''
+		);
 	}
 		
-	function widget_f1pwidget_control() {
-		$options = get_option('widget_f1pwidget');
-  		if(!$options)  {
-    		$options['f1pwidget_title'] = f1_TITLE;
-    		$options['f1pwidget_chars'] = f1_DESC_CHARS;
-    		$options['f1pwidget_items'] = f1_RSS_items;
-    		$options['f1pwidget_desc'] = f1_DESC;
-    		$options['f1pwidget_image'] = f1_IMG;
-  		}
-		if ( $_POST['f1pwidget-submit'] ) {
-			$options['f1pwidget_title'] = strip_tags(stripslashes($_POST['f1pwidget-title']));
-			$options['f1pwidget_items'] = strip_tags(stripslashes($_POST['f1pwidget-items']));
-			$options['f1pwidget_image'] = strip_tags(stripslashes($_POST['f1pwidget-img'] ? 'checked="checked"' : ''));
-			$options['f1pwidget_desc'] = strip_tags(stripslashes($_POST['f1pwidget-desc'] ? 'checked="checked"' : ''));
-			$options['f1pwidget_chars'] = strip_tags(stripslashes($_POST['f1pwidget-chars']));
-			update_option('widget_f1pwidget', $options);
+	public function form($instance)	{
+
+		$instance = wp_parse_args((array)$instance, $this->defaults);
+		$title = !empty($instance['title']) ? $instance['title'] : '';
+		$items_per_page = !empty($instance['items_per_page']) ? $instance['items_per_page'] : '';
+		$trim = !empty($instance['trim_description']) ? $instance['trim_description'] : '';
+		$show_images = !empty($instance['show_images']) ? $instance['show_images'] : '';
+		$show_date = !empty($instance['show_date']) ? $instance['show_date'] : '';
+		$show_description = !empty($instance['show_description']) ? $instance['show_description'] : '';
+		?>
+
+		<p>
+			<label for="<?=$this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label> 
+			<input class="widefat" id="<?=$this->get_field_id('title'); ?>" name="<?=$this->get_field_name('title'); ?>" type="text" value="<?=esc_attr($title); ?>">
+		</p>
+		<p>
+			<label for="<?=$this->get_field_id('items_per_page'); ?>"><?php _e('Items:'); ?></label> 
+			<input class="widefat" id="<?=$this->get_field_id('items_per_page'); ?>" name="<?=$this->get_field_name('items_per_page'); ?>" type="text" value="<?=esc_attr($items_per_page); ?>">
+		</p>
+		<p>
+		    <input class="checkbox" type="checkbox" <?php checked($show_images, 'on'); ?> id="<?=$this->get_field_id('show_images'); ?>" name="<?=$this->get_field_name('show_images'); ?>" /> 
+		    <label for="<?=$this->get_field_id('show_images'); ?>"> Show Images</label>
+		</p>
+		<p>
+		    <input class="checkbox" type="checkbox" <?php checked($show_date, 'on'); ?> id="<?=$this->get_field_id('show_date'); ?>" name="<?=$this->get_field_name('show_date'); ?>" /> 
+		    <label for="<?=$this->get_field_id('show_date'); ?>"> Show Item Date</label>
+		</p>
+		<p>
+		    <input class="checkbox" type="checkbox" <?php checked($show_description, 'on'); ?> id="<?=$this->get_field_id('show_description'); ?>" name="<?=$this->get_field_name('show_description'); ?>" /> 
+		    <label for="<?=$this->get_field_id('show_description'); ?>"> Show Item Description</label>
+		</p>
+		<p>    
+			<label for="<?=$this->get_field_id('trim_description'); ?>">
+			<input id="<?=$this->get_field_id('trim_description'); ?>" name="<?=$this->get_field_name('trim_description'); ?>" size="3" maxlength="3" type="text" value="<?=esc_attr($trim); ?>" /> Trim Description</label>		
+		</p>
+			<?php 
+	}
+
+	public function widget($args, $instance)	{
+		$title = $instance['title'];
+		$perpage = $instance['items_per_page'];
+		$trim = $instance['trim_description'];
+		$show_images = $instance['show_images'];
+		$show_date = $instance['show_date'];
+		$show_description = $instance['show_description'];
+		
+		echo $args['before_widget'];?>
+		
+		<style>
+		.f1press-item	{
+			display: inline-block;
+			padding: 0;
 		}
+		.f1press-item-image	{
+		-moz-transition:-moz-transform 0.5s ease-in; 
+		-webkit-transition:-webkit-transform 0.5s ease-in; 
+		-o-transition:-o-transform 0.5s ease-in;
+		float:left; 
+		padding:5px
+		}
+		.f1press-item-image:hover	{
+		-moz-transform:scale(1.1); 
+		-webkit-transform:scale(1.1);
+		-o-transform:scale(1.1);
+		 filter: alpha(Opacity=80);
+		opacity: 0.8;
+		}
+		.f1press-item-date	{
+			font-size: 10px;
+		}
+		</style>
 		
-		$title = htmlspecialchars($options['f1pwidget_title'], ENT_QUOTES);
-		$items = htmlspecialchars($options['f1pwidget_items'], ENT_QUOTES);
-		$image = htmlspecialchars($options['f1pwidget_image'], ENT_QUOTES);
-		$desc = htmlspecialchars($options['f1pwidget_desc'], ENT_QUOTES);
-		$chars = htmlspecialchars($options['f1pwidget_chars'], ENT_QUOTES);
+		<?php
+		if($title)	{
+			echo '<h3 class="f1press-widget-title">'.$title.'</h3>';
+		}
+		$rss = fetch_feed($this->feed);
+		$maxitems = $rss->get_item_quantity($perpage); 
+		$rss_items = $rss->get_items(0, $maxitems);
+		foreach($rss_items as $item)	{
+			$enc = $item->get_enclosures();?>
+			<div class="f1press-item">
+			<a target="_blank" title="<?=$item->get_title();?>" href="<?=$item->get_permalink();?>">
+			<div class="f1press-item-title"><strong><?=$item->get_title();?></strong></div>
+			<?php if($show_date): ?>
+			<div class="f1press-item-date"><strong><?=$item->get_date('j F Y | g:i a');?></strong></div>
+			<?php endif; ?>
+			<?php if($show_images): ?>
+			<img class="f1press-item-image" src="<?=$enc[0]->thumbnails[1];?>" alt="<?=$item->get_title();?>" />
+			<?php endif; ?>
+			<?php if($show_description): ?>
+			<div class="f1press-item-description"><?=wp_trim_words($item->get_description(), $trim, $more = null);?></div>
+			<?php endif; ?>
+			</a>
+			</div>
+			<hr style="border: 1px dotted" />
+		<?php
+		}
+		echo $args['after_widget'];
+	}
+
+	public function update($new_instance, $old_instance)	{
+		$instance = array();
+		$instance['title'] = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
+		$instance['items_per_page'] = (!empty($new_instance['items_per_page'])) ? strip_tags($new_instance['items_per_page']) : '';
+		$instance['trim_description'] = (isset($new_instance['trim_description'])) ? strip_tags($new_instance['trim_description']) : '';
+		$instance['show_images'] = (isset($new_instance['show_images'])) ? strip_tags($new_instance['show_images']) : '';
+		$instance['show_date'] = (isset($new_instance['show_date'])) ? strip_tags($new_instance['show_date']) : '';
+		$instance['show_description'] = (isset($new_instance['show_description'])) ? strip_tags($new_instance['show_description']) : '';
 		
-		echo '<p><label for="f1pwidget-title">'. _e('Title') .' <input style="width: 200px;" id="f1pwidget-title" name="f1pwidget-title" type="text" value="'.$title.'" /></label></p>';
-		echo '<p><label for="f1pwidget-items">'._e('Items').' <input style="width: 50px;" id="f1pwidget-items" name="f1pwidget-items" type="text" value="'.$items.'" /></label></p>';
-		echo '<p><label for="f1pwidget-img">'._e('Show image').' <input id="f1pwidget-img" name="f1pwidget-img" type="checkbox" '. $image.' /></label></p>';
-		echo '<p><label for="f1pwidget-desc">'. _e('Show description') .' <input id="f1pwidget-desc" name="f1pwidget-desc" type="checkbox" '. $desc .' /></label></p>';
-		echo '<p><label for="f1pwidget-chars">'._e('Symbols in description').'<input id="f1pwidget-chars" name="f1pwidget-chars" size="3" maxlength="3" type="text" value="'. $chars .'" /></label></p>';
-		echo '<input type="hidden" id="f1pwidget-submit" name="f1pwidget-submit" value="1" />';
+		return $instance;
+	}
+	
 }
-	register_widget_control('F1 Press', 'widget_f1pwidget_control', 200, 200);		
-	wp_register_sidebar_widget(sanitize_title('F1 Press'), 'F1 Press', 'widget_f1pwidget', array('description' => __('Formula 1 official site news')));
-}
-add_action('widgets_init', 'widget_f1pwidget_init');
 
 ?>
