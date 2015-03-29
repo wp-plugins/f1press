@@ -67,6 +67,10 @@ This plugin uses The Ergast Developer API.
 2. Activate the plugin F1Press through the 'Plugins' menu in WordPress and use shortcodes.
 3. Add the widget to your sidebar from Appearance->Widgets and configure the widget options.
 
+== Screenshots ==
+
+1. Plugin View
+
 == Changelog ==
 
 = 1.0 =
