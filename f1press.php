@@ -3,7 +3,7 @@
 /*
 Plugin Name: F1 Press
 Description: Displays the latest Formula1 news on your blog.
-Version: 1.5
+Version: 2.0
 Author: Limeira Studio
 Author URI: http://www.limeirastudio.com/
 License: GPL2
@@ -16,6 +16,9 @@ function register_f1_press_widget()	{
 add_action('widgets_init', 'register_f1_press_widget');
 
 class F1_Press extends WP_Widget {
+	
+	private $plugname;
+	private $version;
 			
 	private $feed = 'http://feeds.bbci.co.uk/sport/0/formula1/rss.xml';
 	
@@ -35,6 +38,10 @@ class F1_Press extends WP_Widget {
 			'show_date'			=> '',
 			'show_countdown'	=> ''
 		);
+		$this->plugname = 'F1Press';
+		$this->version = '2.0';
+		$this->load_style();
+		add_shortcode('f1press',array(&$this,'f1press_shortcode'));
 	}
 		
 	public function form($instance)	{
@@ -89,33 +96,7 @@ class F1_Press extends WP_Widget {
 		$show_description = $instance['show_description'];
 		$show_countdown = $instance['show_countdown'];
 		
-		echo $args['before_widget'];?>
-
-		<style>
-		.f1press-item	{
-			display: inline-block;
-			padding: 0;
-		}
-		.f1press-item-image	{
-		-moz-transition:-moz-transform 0.5s ease-in; 
-		-webkit-transition:-webkit-transform 0.5s ease-in; 
-		-o-transition:-o-transform 0.5s ease-in;
-		float:left; 
-		padding:5px
-		}
-		.f1press-item-image:hover	{
-		-moz-transform:scale(1.1); 
-		-webkit-transform:scale(1.1);
-		-o-transform:scale(1.1);
-		 filter: alpha(Opacity=80);
-		opacity: 0.8;
-		}
-		.f1press-item-date	{
-			font-size: 10px;
-		}
-		</style>
-		
-		<?php
+		echo $args['before_widget'];
 		if($title)	{
 			echo '<h3 class="f1press-widget-title">'.$title.'</h3>';
 		}
@@ -165,6 +146,183 @@ class F1_Press extends WP_Widget {
 			</div>';
 	}
 	
+	public function f1press_shortcode($atts)	{
+		
+		require_once(plugin_dir_path( __FILE__ ).'html_table.class.php');
+		$tbl = new HTML_Table('', 'f1-results');
+		
+		if(isset($_GET['sc-replace']))	{
+			$atts['type'] = $_GET['sc-replace-type'];
+			$atts['season'] = $_GET['sc-replace-season'];
+			$atts['round'] = $_GET['sc-replace-round'];
+		}
+		
+		$tbl->addRow();
+		
+		if(!isset($atts['season']))	{
+			$atts['season'] = date('Y');
+		}
+		
+		if(!isset($atts['round']))	{
+			$atts['round'] = 1;
+		}
+		
+		switch($atts['type'])	{
+			
+			case 'race_results':
+				
+			if(!isset($atts['season']))	{
+				$url = 'http://ergast.com/api/f1/current/last/results.json';
+			}	elseif(!isset($atts['round'])) {
+				$url = 'http://ergast.com/api/f1/'.$atts['season'].'/results.json';
+			}	else{
+				$url = 'http://ergast.com/api/f1/'.$atts['season'].'/'.$atts['round'].'/results.json';
+			}
+
+			$data = $this->get_API($url)->MRData->RaceTable->Races[0]->Results;
+			
+			$tbl->addCell('Pos', 'first', 'header');
+		    $tbl->addCell('No', '', 'header');
+		    $tbl->addCell('Driver', '', 'header');
+			$tbl->addCell('Constructor', '', 'header');
+			$tbl->addCell('Laps', '', 'header');
+			$tbl->addCell('Grid', '', 'header');
+			$tbl->addCell('Fastest Lap', '', 'header');
+			$tbl->addCell('Time', '', 'header');
+			$tbl->addCell('Status', '', 'header');
+			$tbl->addCell('Points', '', 'header');
+
+		    foreach($data as $row)	{
+		    	$tbl->addRow();
+
+				@$tbl->addCell($row->position);
+				@$tbl->addCell($row->number);
+				@$tbl->addCell('<a href="'.$row->Driver->url.'" target="_blank">'.$row->Driver->givenName.' '.$row->Driver->familyName.'</a>');
+				@$tbl->addCell('<a href="'.$row->Constructor->url.'" target="_blank">'.$row->Constructor->name.'</a>');
+				@$tbl->addCell($row->laps);
+				@$tbl->addCell($row->grid);
+				@$tbl->addCell($row->FastestLap->Time->time);
+				@$tbl->addCell($row->Time->time);
+				@$tbl->addCell($row->status);
+				@$tbl->addCell($row->points);
+
+			}
+	
+			break;
+			
+			case 'season_list':
+			
+			$url = 'http://ergast.com/api/f1/'.$atts['season'].'.json';
+			$data = $this->get_API($url)->MRData->RaceTable->Races;
+				
+			$tbl->addCell('Race', 'first', 'header');
+		    $tbl->addCell('Circuit', '', 'header');
+		    $tbl->addCell('Date', '', 'header');
+			$tbl->addCell('Time', '', 'header');
+			$tbl->addCell('Location', '', 'header');
+			$tbl->addCell('Information', '', 'header');
+			
+		    
+		    foreach($data as $row)	{
+				$tbl->addRow();
+				
+				@$tbl->addCell($row->raceName);
+				@$tbl->addCell($row->Circuit->circuitName);
+				@$tbl->addCell($row->date);
+				@$tbl->addCell($row->time);
+				@$tbl->addCell($row->Circuit->Location->locality . '('.$row->Circuit->Location->country.')');
+				@$tbl->addCell('<a href="?sc-replace=true&sc-replace-type=qualifying_results&sc-replace-season='.$atts['season'].'&sc-replace-round='.$row->round.'"><strong>Q</strong></a> <a href="?sc-replace=true&sc-replace-type=race_results&sc-replace-season='.$atts['season'].'&sc-replace-round='.$row->round.'"><strong>R</strong></a> <a href="'.$row->url.'" target="_blank"><img style="width:16px; height:16px;" src="'.plugin_dir_url( __FILE__ ) . 'info.png'.'" alt="'.$row->Circuit->circuitName.' on Wikipedia" /></a> <a href="http://maps.google.com/maps?q='.$row->Circuit->Location->lat.',+'.$row->Circuit->Location->long.'" target="_blank"><img style="width:16px; height:16px;" src="'.plugin_dir_url( __FILE__ ) . 'map.png'.'" alt="'.$row->Circuit->circuitName.' on Wikipedia" /></a>');
+		    }
+				
+			break;
+			
+			case 'driver_info':
+			$drivers = preg_split("/[\s,]+/", $atts['id']);
+			if(isset($atts['mode']) && $atts['mode'] == 'table')	{				
+				$tbl->addCell('Name', '', 'header');
+				$tbl->addCell('Number', 'first', 'header');
+				$tbl->addCell('Code', '', 'header');
+				$tbl->addCell('Date Of Birth', '', 'header');				
+				$tbl->addCell('Nationality', '', 'header');
+				$tbl->addCell('Information', '', 'header');
+			}
+				
+			foreach($drivers as $driver)	{
+
+				$url = 'http://ergast.com/api/f1/drivers/'.$driver.'.json';
+				$data = $this->get_API($url)->MRData->DriverTable->Drivers;		
+					
+				foreach($data as $row)	{
+						
+					if(isset($atts['mode']) && $atts['mode'] == 'table')	{
+						
+						$tbl->addRow();
+							
+						@$tbl->addCell('<a href="'.$row->url.'" target="_blank">'.$row->givenName.' '.$row->familyName.'</a>');
+						@$tbl->addCell($row->permanentNumber);
+						@$tbl->addCell($row->code);
+						@$tbl->addCell($row->dateOfBirth);
+						@$tbl->addCell($row->nationality);
+						@$tbl->addCell('<a href="'.$row->url.'" target="_blank"><img style="width:16px; height:16px;" src="'.plugin_dir_url( __FILE__ ) . 'info.png'.'" alt="'.$row->givenName.' '.$row->familyName.' on Wikipedia" /></a>');
+						}	else {
+								
+							echo '<div style="display:inline-block; padding:10px">';
+							echo '<h4><a href="'.$row->url.'" target="_blank">'.$row->givenName.' '.$row->familyName.'</a></h4>';	
+							echo '<img style="float:left" src="'.$this->get_wiki_image($row->url).'" />';
+							echo '</div>';
+						}
+				}
+			}
+				
+			break;
+			
+			case 'qualifying_results':
+				
+			$url = 'http://ergast.com/api/f1/'.$atts['season'].'/'.$atts['round'].'/qualifying.json';		
+			$data = $this->get_API($url)->MRData->RaceTable->Races[0]->QualifyingResults;
+				
+			$tbl->addCell('Pos', 'first', 'header');
+		    $tbl->addCell('No', '', 'header');
+		    $tbl->addCell('Driver', '', 'header');
+			$tbl->addCell('Constructor', '', 'header');
+			$tbl->addCell('Q1', '', 'header');
+			$tbl->addCell('Q2', '', 'header');
+			$tbl->addCell('Q3', '', 'header');
+			
+			foreach($data as $row)	{
+				$tbl->addRow();
+				@$tbl->addCell($row->position);
+				@$tbl->addCell($row->number);
+				@$tbl->addCell('<a href="'.$row->Driver->url.'" target="_blank">'.$row->Driver->givenName.' '.$row->Driver->familyName.'</a>');
+				@$tbl->addCell('<a href="'.$row->Constructor->url.'" target="_blank">'.$row->Constructor->name.'</a>');
+				@$tbl->addCell($row->Q1);
+				@$tbl->addCell($row->Q2);
+				@$tbl->addCell($row->Q3);
+			}
+			
+			break;			
+		}
+		echo $tbl->display();	
+	}
+	
+	private function load_style()	{
+		if(!is_admin())	{
+			wp_enqueue_style($this->plugname,plugin_dir_url( __FILE__ ).'style.css', array(), $this->version, 'all');
+		}
+	}
+	
+	private function get_wiki_image($wiki_url)	{
+		$pathComponents = explode('/', parse_url($wiki_url, PHP_URL_PATH));
+		$pageTitle = array_pop($pathComponents);
+		$imagesQuery = "http://en.wikipedia.org/w/api.php?action=query&titles={$pageTitle}&prop=pageimages&format=json&pithumbsize=200";
+		$imageKey = key($this->get_API($imagesQuery)->query->pages);
+		return $this->get_API($imagesQuery)->query->pages->$imageKey->thumbnail->source;
+	}
+	
+	private function get_API($url)	{
+		return (json_decode(@file_get_contents($url))) ? json_decode(@file_get_contents($url)) : false;
+	}
+
 }
 
 ?>

@@ -1,0 +1,52 @@
+	/* 
+	Generic Table Styling, for Desktops/Laptops 
+	*/
+	table.f1-results { 
+		width: 70%; 
+		border-collapse: collapse; 
+	}
+	/* Zebra striping */
+	tr:nth-of-type(odd) { 
+		background: #eee; 
+	}
+	th { 
+		background: #333; 
+		color: white; 
+		font-weight: bold; 
+	}
+	td, th { 
+		padding: 6px; 
+		border: 1px solid #ccc; 
+		text-align: left; 
+	}
+	tr:hover td {
+	  background:#4E5066;
+	  color:#FFFFFF;
+	  border-top: 1px solid #22262e;
+	  border-bottom: 1px solid #22262e;
+	}
+	
+/*
+ * RSS
+ */
+        .f1press-item   {
+            display: inline-block;
+            padding: 0;
+        }
+        .f1press-item-image {
+        -moz-transition:-moz-transform 0.5s ease-in; 
+        -webkit-transition:-webkit-transform 0.5s ease-in; 
+        -o-transition:-o-transform 0.5s ease-in;
+        float:left; 
+        padding:5px
+        }
+        .f1press-item-image:hover   {
+        -moz-transform:scale(1.1); 
+        -webkit-transform:scale(1.1);
+        -o-transform:scale(1.1);
+         filter: alpha(Opacity=80);
+        opacity: 0.8;
+        }
+        .f1press-item-date  {
+            font-size: 10px;
+        }
