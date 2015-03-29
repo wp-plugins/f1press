@@ -21,7 +21,7 @@ Now you can display information about races, qualifying results and drivers. You
 
 This shortcode will be display information about about the race in 2013 year and fifth in a row.
 
-Next shortcode displays the results of the last race of the season:
+Next shortcode displays the results of the latest race:
 
 [f1press type="race_results"]
 
