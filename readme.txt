@@ -7,7 +7,8 @@ Tested up to: 4.1.1
 Stable tag: 2.0
 
 
-Displays the latest Formula1 news on your blog.
+Shows races and qualifications results. Information about Formula 1 racers.
+Displays the latest Formula1 news on your blog. Next Race Countdown.
 
 == Description ==
 
