@@ -60,6 +60,7 @@ We can choose what driver info will be displayed in the "id" field. For example 
 
 The "mode" option chose the type of displaying. Mode "table" displays inormation in table view. For example.
 
+[f1press type="driver_info" id="hamilton, massa, alonso"]
 Displays information in listing view with images and Wikipedia links for additional information.
 
 Also, the plugin provides a customizable widget that displays the latest Formula1 news and the countdown to the next race in sidebar.
