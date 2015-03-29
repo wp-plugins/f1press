@@ -14,17 +14,18 @@ Displays the latest Formula1 news on your blog.
 Now you can display information about races, qualifying results and drivers. You can insert a table of results in posts by using shortcodes.
 
 
-1. Latest Info for ANY Race
+=== Latest Info for ANY Race: ===
 
 [f1press type="race_results" season="2013" round="5"]
 
 This shortcode will be display information about about the race in 2013 year and fifth in a row.
+
 Next shortcode displays the results of the last race of the season:
 
 [f1press type="race_results"]
 
 
-2. Qualifications Results:
+=== Qualifications Results: ===
 
 [f1press type="qualifying_results" season="2013" round="5"]
 
@@ -37,7 +38,9 @@ OR
 for latest qualification results.
 
 
-3. All races in the season of 2013 with additional info.
+=== All races in the season with additional info: ===
+
+For the 2013 season:
 
 [f1press type="season_list" season="2013"]
 
@@ -46,7 +49,7 @@ For the current season:
 [f1press type="season_list"]
 
 
-4. Information about drivers can be display with the following shortcode:
+=== Information about drivers can be display with the following shortcode: ===
 
 [f1press type="driver_info" id="hamilton, massa, alonso"]
 
