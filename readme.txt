@@ -74,7 +74,8 @@ This plugin uses The Ergast Developer API.
 
 == Screenshots ==
 
-1. Plugin View
+1. Plugin View (Drivers)
+2. Results Tables View
 
 == Changelog ==
 
