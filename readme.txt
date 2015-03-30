@@ -63,7 +63,7 @@ The "mode" option chose the type of displaying. Mode "table" displays inormation
 [f1press type="driver_info" id="hamilton, massa, alonso"]
 Displays information in listing view with images and Wikipedia links for additional information.
 
-Also, the plugin provides a customizable widget that displays the latest Formula1 news and the countdown to the next race in sidebar.<br/>
+Also, the plugin provides a customizable widget that displays the latest Formula1 news and the countdown to the next race in sidebar.
 <a href="http://ergast.com/mrd/">This plugin uses The Ergast Developer API.</a>
 
 == Installation ==
