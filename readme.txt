@@ -1,6 +1,6 @@
 === F1Press ===
 Contributors: LimeiraStudio
-Tags: Formula1, F1, formula 1, Grand Prix, aggregation, feed, BBC News, countdown, car, cars, sport, racing, news, widget, Schumacher, Hamilton, Alonso, Rosberg, Vettel, McLaren, Ferrari, Mercedes, Sauber, Williams, sidebar, RSS
+Tags: Formula1, F1, formula 1, Grand Prix, aggregation, feed, BBC News, countdown, car, cars, sport, racing, news, widget, Schumacher, Hamilton, Alonso, Rosberg, Vettel, McLaren, Ferrari, Mercedes, Sauber, Williams, sidebar, RSS, widget, plugin, wordpress
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CLS5HQLCVS2G8
 Requires at least: 3.0.1
 Tested up to: 4.1.1
